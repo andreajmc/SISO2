@@ -131,9 +131,27 @@ char *int2bin(uint8_t t_value)
 
 int getFreeBlock()
 {
-  printf("TODO");
-  return 0;
-  
+	int j = 0;
+	int i = 0;
+	for( j = 0; j < 512*4 && FILE_BITMAP == 0x00 ; j++ ) {
+	}	
+	if( j == 512 * 4 ){
+		return -1;	
+	}
+	int k = 0;
+
+	for ( i = 0 ; i < sizeof(char) * 8 ; i++ ) {
+		if ( ((FILE_BITMAP[j] << i) & 0x80) == 0x80 ) {
+			int aux = 0x1;
+			for ( k = 0 ; k < sizeof(char)*8 - i - 1 ; k++ ) {
+				aux <<= 1;
+			}
+			aux = ~aux;
+			FILE_BITMAP[j] &= aux;
+			return j * sizeof(char) * 8 + i;
+		}
+	}	
+	return 0xCABA110;
 }
 
 
@@ -147,8 +165,30 @@ void setBlockBusy(int t_block)
 
 void setBlockFree(int t_block)
 {
-   printf("TODO");
-   return;
+   	if( t_block <= 0 || t_block > 2047 ){
+		return -1;
+	}
+	
+	
+	
+	int indexToModify = t_block / 8;
+	int indexOfIndexToModify = t_block % 8;
+	
+	char newEntry;
+	switch( indexOfIndexToModify ){
+		case 0: newEntry = 0x80; break;
+		case 1: newEntry = 0x40; break;
+		case 2: newEntry = 0x20; break;
+		case 3: newEntry = 0x10; break;
+		case 4: newEntry = 0x08; break;
+		case 5: newEntry = 0x04; break;
+		case 6: newEntry = 0x02; break;
+		case 7: newEntry = 0x01; break;
+	}
+	
+	FILE_BITMAP[indexToModify] |= newEntry;
+	writeBITMAP();
+	return 0;
 }
 
 //funcion que almacena el bitmap en un archivo, es necesario ejecutar el comando write
