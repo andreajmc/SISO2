@@ -131,64 +131,86 @@ char *int2bin(uint8_t t_value)
 
 int getFreeBlock()
 {
-	int j = 0;
-	int i = 0;
-	for( j = 0; j < 512*4 && FILE_BITMAP == 0x00 ; j++ ) {
-	}	
-	if( j == 512 * 4 ){
-		return -1;	
-	}
-	int k = 0;
-
-	for ( i = 0 ; i < sizeof(char) * 8 ; i++ ) {
-		if ( ((FILE_BITMAP[j] << i) & 0x80) == 0x80 ) {
-			int aux = 0x1;
-			for ( k = 0 ; k < sizeof(char)*8 - i - 1 ; k++ ) {
-				aux <<= 1;
-			}
-			aux = ~aux;
-			FILE_BITMAP[j] &= aux;
-			return j * sizeof(char) * 8 + i;
+ char *s = malloc(BITS_PER_WORD + 1);
+  s[BITS_PER_WORD] = '\0';
+  int i;
+  int num;
+  uint8_t mask = 1 << (BITS_PER_WORD - 1); 
+  uint8_t val = 0;
+  for (num = 0; num < 12; num++) {
+	  val = BITMAP[num];
+  	for (i = 0; i < BITS_PER_WORD; i++, mask >>= 1) {
+    		s[i] = ((val & mask) == 0) ? '0' : '1';
+		if (!((val & mask) == 0)) {
+			int num2 = 8*num + i;
+			// printf("%d",num2);
+			return num2;
 		}
-	}	
-	return 0xCABA110;
+  	}
+	mask = 1 << (BITS_PER_WORD - 1);
+  }
+  printf("%d", val);
+  return 3;	
 }
 
 
 
-void setBlockBusy(int t_block)
-{
+void setBlockBusy(int t_block) {
+	char *s = malloc(BITS_PER_WORD + 1);
+  s[BITS_PER_WORD] = '\0';
+	int i;
+  	int num;
+	uint8_t mask = 1 << (BITS_PER_WORD - 1); 
+  	uint8_t val = 0;
+	uint8_t block = t_block/8;
+	val = BITMAP[block];
+	for (i = 0; i < BITS_PER_WORD; i++, mask >>= 1) {
+		s[i] = ((val & mask) == 0) ? '0' : '1';
+		if ((8*block + 1) == t_block && (( val & mask) == 0) {
+			s[i] = '0';
+			switch(i) {
+				/*case 0:
+					BITMAP[block] = 128;
+					break;
+				case 1:
+					BITMAP[block] = 64;
+					break;
+				case 2:
+					BITMAP[block] = 32;
+					break;
+				}*/
+		}
+	}
 
-   printf("TODO");
-   return;
 }
 
 void setBlockFree(int t_block)
 {
-   	if( t_block <= 0 || t_block > 2047 ){
-		return -1;
+   char *s = malloc(BITS_PER_WORD + 1);
+  s[BITS_PER_WORD] = '\0';
+	int i;
+  	int num;
+	uint8_t mask = 1 << (BITS_PER_WORD - 1); 
+  	uint8_t val = 0;
+	uint8_t block = t_block/8;
+	val = BITMAP[block];
+	for (i = 0; i < BITS_PER_WORD; i++, mask >>= 1) {
+		s[i] = ((val & mask) == 0) ? '0' : '1';
+		if ((8*block + 1) == t_block && (( val & mask) == 0) {
+			s[i] = '1';
+			switch(i) {
+				/*case 0:
+					BITMAP[block] = 128;
+					break;
+				case 1:
+					BITMAP[block] = 64;
+					break;
+				case 2:
+					BITMAP[block] = 32;
+					break;
+				}*/
+		}
 	}
-	
-	
-	
-	int indexToModify = t_block / 8;
-	int indexOfIndexToModify = t_block % 8;
-	
-	char newEntry;
-	switch( indexOfIndexToModify ){
-		case 0: newEntry = 0x80; break;
-		case 1: newEntry = 0x40; break;
-		case 2: newEntry = 0x20; break;
-		case 3: newEntry = 0x10; break;
-		case 4: newEntry = 0x08; break;
-		case 5: newEntry = 0x04; break;
-		case 6: newEntry = 0x02; break;
-		case 7: newEntry = 0x01; break;
-	}
-	
-	FILE_BITMAP[indexToModify] |= newEntry;
-	writeBITMAP();
-	return 0;
 }
 
 //funcion que almacena el bitmap en un archivo, es necesario ejecutar el comando write
