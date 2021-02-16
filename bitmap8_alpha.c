@@ -131,6 +131,7 @@ char *int2bin(uint8_t t_value)
 
 int getFreeBlock()
 {
+	//  {0,20,30,40,50,60,70,80,90,100,11,12};
  char *s = malloc(BITS_PER_WORD + 1);
   s[BITS_PER_WORD] = '\0';
   int i;
@@ -155,7 +156,11 @@ int getFreeBlock()
 
 
 
-void setBlockBusy(int t_block) {
+void setBlockBusy(int t_block) { // marcar el t_block como ocupado --> dividir t_block/8 y poner en 0 el bit en esa posicion. La division entera es la posicion
+	// y el mod es el bit
+	// entero posicion 3, el el bit 6 hay que marcarlo 0. 
+	// 0 es ocupado, 1 es libre
+	// indice de izquiera a derecha y empieza a 0
 	char *s = malloc(BITS_PER_WORD + 1);
   s[BITS_PER_WORD] = '\0';
 	int i;
